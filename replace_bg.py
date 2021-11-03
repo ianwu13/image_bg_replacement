@@ -23,22 +23,27 @@ def bg_size_match(dim, bg_img):
         return cv2.resize(bg_img, (dim[1], dim[0]))
 
 
-def map_normalization(map):
+def normalize_map(map):
+    n_map = np.zeros((map.shape[0], map.shape[1]))
 
-    print()
+    for row in range(len(map)):
+        for col in range(len(map[0])):
+            n_map[row, col] = (map[row, col, 0] / 255)
+
+    return n_map
 
 
-def combine():
-    img = cv2.imread(image_path)
-
-    map = cv2.imread(map_path)
-    norm_image = cv2.normalize(map, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+def combine(img, map, bg):
+    map = normalize_map(map)
+    bg = bg_size_match(img.shape, bg)
 
     for row in range(len(img)):
         for col in range(len(img[row])):
-            float_val = img[row, col]
-            img[row, col] = (float_val * norm_image[row, col])
-    
-    cv2.imshow("removed-bg", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+            fg_pix = img[row, col]
+            bg_pix = bg[row, col]
+            weight = map[row, col]
+            i_weight = 1-weight
+
+            img[row, col] = (fg_pix * weight) + (bg_pix * i_weight)
+
+    return img
