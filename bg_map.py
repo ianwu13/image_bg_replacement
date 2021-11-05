@@ -24,7 +24,7 @@ def normPRED(d):
 def get_bg_map():
 
     # Get image location
-    image_path = "./images/liz.jpg"
+    image_path = "./images/sample_fg.png"
 
     # Create u2net model object
     weights = "./model/u2net_weights.pth"
@@ -48,7 +48,7 @@ def get_bg_map():
     else:
         inputs_test = Variable(inputs_test)
 
-    d1,d2,d3,d4,d5,d6,d7= u2net(inputs_test)
+    d1,d2,d3,d4,d5,d6,d7= u2net(inputs_test[:,0:3,:,:])
 
     # normalization
     pred = d1[:,0,:,:]

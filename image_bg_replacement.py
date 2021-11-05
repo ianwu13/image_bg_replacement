@@ -4,8 +4,8 @@ from replace_bg import *
 
 
 def main():
-    img = cv2.imread("./images/dog.jpg")
-    map = cv2.imread("./images/dog-map.jpg")
+    img = cv2.imread("./images/sample_fg.png")
+    map = cv2.imread("./images/sample_fg-map.png")
     bg = cv2.imread("./images/sample_bg.jpg")
     cv2.imshow("ORIGINAL", img)
     cv2.imshow("MAP", map)
