@@ -9,7 +9,7 @@ from torchvision import transforms
 import numpy as np
 from PIL import Image
 import glob
-
+import cv2
 from model import U2NET
 
 # normalize the predicted SOD probability map
@@ -21,11 +21,7 @@ def normPRED(d):
 
     return dn
 
-def get_bg_map():
-
-    # Get image location
-    image_path = "./images/sample_fg.png"
-
+def get_bg_map(img):
     # Create u2net model object
     weights = "./model/u2net_weights.pth"
     u2net = U2NET(3,1)
@@ -36,35 +32,42 @@ def get_bg_map():
         u2net.load_state_dict(torch.load(weights, map_location='cpu'))
     u2net.eval()
 
-    img = Image.open(image_path)
-    orig_dim = img.size
-    img = img.resize((320,320))
+    # Save original dimensions
+    orig_dim = img.shape[0:2]
 
+    # Get input tensor 
+    img = cv2.resize(img, (320,320))
     transform = transforms.ToTensor()
-    inputs_test = transform(img).unsqueeze(0)
-
+    inputs = transform(img).unsqueeze(0)
     if torch.cuda.is_available():
-        inputs_test = Variable(inputs_test.cuda())
+        inputs = Variable(inputs.cuda())
     else:
-        inputs_test = Variable(inputs_test)
+        inputs = Variable(inputs)
 
-    d1,d2,d3,d4,d5,d6,d7= u2net(inputs_test[:,0:3,:,:])
+    # Run model to generate saliency map
+    d1,d2,d3,d4,d5,d6,d7= u2net(inputs[:,0:3,:,:])
+
+    # TODO
 
     # normalization
     pred = d1[:,0,:,:]
     pred = normPRED(pred)
 
     # save results to test_results folder
-    out = np.squeeze(d1)
+    out = d1.detach().numpy() # np.squeeze(d1)
+    print(out.shape)
 
-    to_im = transforms.ToPILImage()
-    im = to_im(out)
-    im = im.resize(orig_dim)
+    #to_im = transforms.ToPILImage()
+    #im = to_im(out)
+    out = cv2.resize(out, orig_dim)
 
     split_img_path = image_path.split('/')
     image_name = split_img_path[len(split_img_path) - 1]
     map_name = image_name.split('.')[0] + "-map." + image_name.split('.')[1]
-    im.save(map_name)
+    cv2.imwrite(map_name, out)
 
 if __name__ == "__main__":
-    get_bg_map()
+    # Get image location
+    image_path = "./images/liz.jpg"
+    img = cv2.imread(image_path)
+    get_bg_map(img)
