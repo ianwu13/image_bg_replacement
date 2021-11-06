@@ -28,13 +28,13 @@ def normalize_map(map):
 
     for row in range(len(map)):
         for col in range(len(map[0])):
-            n_map[row, col] = (map[row, col, 0] / 255)
+            n_map[row, col] = (map[row, col] / 255)
 
     return n_map
 
 
 def combine(img, map, bg):
-    map = normalize_map(map)
+    # map = normalize_map(map) # Map is already normalized as neural net output
     bg = bg_size_match(img.shape, bg)
 
     for row in range(len(img)):
