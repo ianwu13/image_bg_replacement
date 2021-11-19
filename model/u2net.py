@@ -1,3 +1,4 @@
+# Credit to the original U2-Net Paper (https://github.com/xuebinqin/U-2-Net)
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
